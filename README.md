@@ -4,22 +4,25 @@
 ````
 make [ all | matrix | mbrot | qsort | clean ]
   [all]: 	builds all sources below and outputs to bin/
-  matrix: 	builds from source in matrix/ and outputs a binary to bin/frac
-  mbrot:	builds from source in mandelbrot/ and outputs a binary to bin/mbrot
-  qsort:	builds from source in quicksort/ and outputs a binary to bin/qsort
+  matrix: 	builds from source in matrix/ and outputs a binaries to bin/
+  mbrot:	builds from source in mandelbrot/ and outputs a binaries to bin/
+  qsort:	builds from source in quicksort/ and outputs a binaries to bin/
   clean:	removes all binaries from bin directory
 ````
 
 ### Running
 Run each application using the following commands:
 ````
-./bin/matrix	(runs threaded or sequential matrix multiplication)
+// Runs threaded or sequential matrix multiplication
+./bin/matrix
 ./bin/matrix_seq
 
-./bin/mbrot	(runs threaded or sequential mandelbrot fractal calculations)
+// Runs threaded or sequential mandelbrot fractal calculations
+./bin/mbrot
 ./bin/mbrot_seq
 
-./bin/qsort	(runs threaded or sequential quicksort algorithm)
+// Runs threaded or sequentail quicksort algorithm
+./bin/qsort
 ./bin/qsort_seq
 ````
 
