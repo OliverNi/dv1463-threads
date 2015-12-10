@@ -1,2 +1,4 @@
 *.o
 bin/
+fracout.tga
+time_report_*

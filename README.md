@@ -11,20 +11,32 @@ make [ all | matrix | mbrot | qsort | clean ]
 ````
 
 ### Running
-Run each application using the following commands:
+Run each application using the commands described below.
+
+Runs threaded or sequential matrix multiplication
 ````
-// Runs threaded or sequential matrix multiplication
 ./bin/matrix
 ./bin/matrix_seq
+````
 
-// Runs threaded or sequential mandelbrot fractal calculations
+Runs threaded or sequential mandelbrot fractal calculations
+````
 ./bin/mbrot
 ./bin/mbrot_seq
+````
 
-// Runs threaded or sequentail quicksort algorithm
+Runs threaded or sequential quicksort algorithm
+````
 ./bin/qsort
 ./bin/qsort_seq
 ````
+
+### Time
+To generate reports, do:
+````
+./time
+````
+All files in /bin will be timed.
 
 Best regards,
 Dino & Oliver

@@ -1,0 +1,15 @@
+if [ ! -d bin/ ]; then
+	echo "No binaries found, building..."
+	make
+fi
+
+START=`date`
+for file in bin/*; do
+	echo -n "Running $file ..."
+	time $file &>/dev/null
+	echo ""
+done
+
+END=`date`
+echo "Measurements started at $START"
+echo "Measurements ended at $END"
