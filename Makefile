@@ -1,16 +1,20 @@
+CC=gcc
 
-all: frac mbrot qsort
+all: matrix mbrot qsort
 dir:
 	@mkdir -p bin/
 
-frac: dir
-	gcc fractal/main.c -o bin/frac
+matrix: dir
+	$(CC) matrix/main.c -o bin/matrix
+	$(CC) matrix/seq.c -o bin/matrix_seq
 
 mbrot: dir
-	gcc mandelbrot/main.c -o bin/mbrot
+	$(CC) mandelbrot/main.c -o bin/mbrot
+	$(CC) mandelbrot/seq.c -o bin/mbrot_seq
 
 qsort: dir
-	gcc quicksort/main.c -o bin/qsort
+	$(CC) quicksort/main.c -o bin/qsort
+	$(CC) quicksort/seq.c -o bin/qsort_seq
 
 clean:
 	@rm bin/* ||:
