@@ -13,7 +13,7 @@ mbrot: dir
 	$(CC) mandelbrot/seq.c -o bin/mbrot_seq
 
 qsort: dir
-	$(CC) quicksort/main.c -o bin/qsort
+	$(CC) -pthread quicksort/main.c -o bin/qsort
 	$(CC) quicksort/seq.c -o bin/qsort_seq
 
 clean:
