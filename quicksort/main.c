@@ -94,19 +94,19 @@ void quick_sort(int *v, unsigned low, unsigned high, int limit) {
 
 	if (limit-- > 0) {
 		pthread_t thread;
-		pthread_attr_t attr;
-		pthread_attr_init(&attr);
 
 		args_s args1 = init_args(v, low, pivot_index - 1, limit);
 		args_s args2 = init_args(v, pivot_index + 1, high, limit);
 
-		if (low < pivot_index) pthread_create(&thread, &attr, quick_sort_thread, (void*)&args1);
-		if (pivot_index < high) pthread_create(&thread, &attr, quick_sort_thread, (void*)&args2);
+		if (low < pivot_index) pthread_create(&thread, NULL, quick_sort_thread, (void*)&args1);
+		if (pivot_index < high) pthread_create(&thread, NULL, quick_sort_thread, (void*)&args2);
 
 		pthread_join(thread, NULL);
 	} else {
-		if (low < pivot_index) quick_sort(v, low, pivot_index - 1, 0);
-		if (pivot_index < high) quick_sort(v, pivot_index + 1, high, 0);
+		if (low < pivot_index)
+			quick_sort(v, low, pivot_index - 1, 0);
+		if (pivot_index < high)
+			quick_sort(v, pivot_index + 1, high, 0);
 	}
 }
 
