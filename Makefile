@@ -5,8 +5,8 @@ dir:
 	@mkdir -p bin/
 
 matrix: dir
-	$(CC) matrix/main.c -o bin/matrix
-	$(CC) matrix/seq.c -o bin/matrix_seq
+	$(CC) -pthread matrix/main.c -o bin/matrix
+	$(CC)  matrix/seq.c -o bin/matrix_seq
 
 mbrot: dir
 	$(CC) mandelbrot/main.c -o bin/mbrot
