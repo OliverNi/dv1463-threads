@@ -19,7 +19,7 @@ typedef struct {
         int *v;		/* array */
         unsigned low;	/* low */
         unsigned high;	/* high */
-        int limit;	/* limit */
+        unsigned lim;	/* limit for the recursion */
 } args_s;
 
 static void print_array(void) {
@@ -38,19 +38,18 @@ static void init_array(void) {
         v[i] = rand();
 }
 
-static args_s init_args(int *v, unsigned low, unsigned high, int limit) {
+args_s init_args(int *v, unsigned low, unsigned high, int limit) {
         args_s args;
-        args.v = v;
-        args.low = low;
+        args.v    = v;
+        args.low  = low;
         args.high = high;
-        args.limit = limit;
+        args.lim  = limit;
 	return args;
 }
 
 static unsigned partition(int *v, unsigned low, unsigned high, unsigned pivot_index) {
     /* move pivot to the bottom of the vector */
-    if (pivot_index != low)
-        swap(v, low, pivot_index);
+    if (pivot_index != low) swap(v, low, pivot_index);
 
     pivot_index = low;
     low++;
@@ -62,58 +61,60 @@ static unsigned partition(int *v, unsigned low, unsigned high, unsigned pivot_in
 
     /* move elements into place */
     while (low <= high) {
-        if (v[low] <= v[pivot_index])
-            low++;
-        else if (v[high] > v[pivot_index])
-            high--;
-        else
-            swap(v, low, high);
+        if (v[low] <= v[pivot_index]) low++;
+        else if (v[high] > v[pivot_index]) high--;
+        else swap(v, low, high);
     }
 
     /* put pivot back between two groups */
-    if (high != pivot_index)
-        swap(v, pivot_index, high);
+    if (high != pivot_index) swap(v, pivot_index, high);
 
     return high;
 }
 
 void* quick_sort_thread(void *s) {
 	args_s *args = s;
-	quick_sort(args->v, args->low, args->high, args->limit);
+	quick_sort(args->v, args->low, args->high, args->lim);
 	pthread_exit(0);
 }
 
 void quick_sort(int *v, unsigned low, unsigned high, int limit) {
-	unsigned pivot_index;
+	if(low >= high) return;
 
-	if(low >= high)
-		return;
-
-	pivot_index = (low + high)/2;
-	pivot_index = partition(v, low, high, pivot_index);
+	unsigned pivot_index = (low + high)/2;
+		 pivot_index = partition(v, low, high, pivot_index);
 
 	if (limit-- > 0) {
 		pthread_t thread;
 
-		args_s args1 = init_args(v, low, pivot_index - 1, limit);
-		args_s args2 = init_args(v, pivot_index + 1, high, limit);
+		if (low < pivot_index) {
+			args_s a = init_args(v, low, pivot_index - 1, limit);
+			pthread_create(&thread, NULL, quick_sort_thread, (void*)&a);
+		}
 
-		if (low < pivot_index) pthread_create(&thread, NULL, quick_sort_thread, (void*)&args1);
-		if (pivot_index < high) pthread_create(&thread, NULL, quick_sort_thread, (void*)&args2);
-
+		quick_sort(v, pivot_index + 1, high, limit);
 		pthread_join(thread, NULL);
 	} else {
-		if (low < pivot_index)
-			quick_sort(v, low, pivot_index - 1, 0);
-		if (pivot_index < high)
-			quick_sort(v, pivot_index + 1, high, 0);
+		quick_sort(v, low, pivot_index - 1,  0);
+		quick_sort(v, pivot_index + 1, high, 0);
 	}
+}
+
+void error_checker() {
+	printf("Error checking started ...\n");
+        int i;
+        int e = 0;
+        for(i = 1;i < MAX_ITEMS;i++)
+                if (v[i - 1] > v[i]) e++;
+
+        printf("Error checking ended. Found %d errors", e);
 }
 
 int main(int argc, char **argv) {
     	init_array();
-	//print_array();
     	quick_sort(v, 0, MAX_ITEMS-1, MAX_THREAD);
-	//print_array();
+
+	// Do not supply args when using time ./<this binary>
+	if (argc > 1) error_checker();
 }
 
