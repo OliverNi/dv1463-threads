@@ -66,8 +66,6 @@ typedef struct {
 /* creates a rectangle from the struct */
 #define MAX_THREAD 8
 #define MAX_SIZE 1024
-int getX(int pos) { return pos % MAX_SIZE; }
-int getY(int pos) { return pos / MAX_SIZE; }
 
 rect_s rect_fromPos(int pos, int size, int max_size) {
 	int x = pos * size % max_size;
@@ -92,24 +90,6 @@ point2d_s point2d(rect_s r) {
 
 	return p;
 }
-
-void point2d_print(point2d_s p) {
-	printf("%-4d %-4d %-4d %-4d\n", p.p1.x, p.p1.y, p.p2.x, p.p2.y);
-}
-
-void print_rect(rect_s r) {
-	printf("%-4d %-4d %-4d %-4d\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
-}
-
-/*void main () {
-	int i = 0;
-	for(i = 0;i < 16;i++) {
-		if (i % 2 == 0) printf("\n");
-		rect_s rect = rect_fromPos(i, 1024 / MAX_THREAD*2, 1024);
-		point2d_s point = point2d(rect);
-		point2d_print(point);
-	}
-}*/
 
 void* mandelbrot_thread(void *s);
 
@@ -156,11 +136,11 @@ void* mandelbrot_thread(void *s) {
 				sx = xn;
 				sy = yn;
 				ii++;
-				if (ii == 200) {
+				if (ii == 1500) {
 					break;
 				}
 			}
-			if (ii == 200) {
+			if (ii == 1500) {
 				arg->pixmap[j + i * (int)arg->size.width] = 0;
 			}
 			else {
