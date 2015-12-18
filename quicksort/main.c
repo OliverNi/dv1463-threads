@@ -1,18 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <math.h>
 
 #define KILO (1024)
 #define MEGA (1024*1024)
 #define MAX_ITEMS (64*MEGA)
-#define MAX_THREAD 3 // 2^3 = 8
+#define MAX_THREAD 8
 
 #define swap(v, a, b) {unsigned tmp; tmp=v[a]; v[a]=v[b]; v[b]=tmp;}
 
 static int *v;
 
 /* quick sort */
-void quick_sort(int *, unsigned, unsigned, int);
+void quick_sort(int *, unsigned, unsigned, unsigned);
 
 /* arguments struct for quicksort_thread */
 typedef struct {
@@ -78,7 +79,7 @@ void* quick_sort_thread(void *s) {
 	pthread_exit(0);
 }
 
-void quick_sort(int *v, unsigned low, unsigned high, int limit) {
+void quick_sort(int *v, unsigned low, unsigned high, unsigned limit) {
 	if(low >= high) return;
 
 	unsigned pivot_index = (low + high)/2;
@@ -112,7 +113,8 @@ void error_checker() {
 
 int main(int argc, char **argv) {
     	init_array();
-    	quick_sort(v, 0, MAX_ITEMS-1, MAX_THREAD);
+
+    	quick_sort(v, 0, MAX_ITEMS-1, (unsigned)log2(MAX_THREAD));
 
 	// Do not supply args when using time ./<this binary>
 	if (argc > 1) error_checker();
