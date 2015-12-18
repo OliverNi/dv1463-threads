@@ -1,0 +1,40 @@
+digraph g{
+a [label=3]
+b [label=2]
+c [label=2]
+
+a -> b
+a -> c
+
+b -> b1
+b -> b2
+
+b1 -> b11
+b1 -> b12
+
+b2 -> b21
+b2 -> b22
+
+c -> c1
+c -> c2
+
+c1 -> c11
+c1 -> c12
+
+c2 -> c21
+c2 -> c22
+
+b1 [label=1]
+b2 [label=1]
+c1 [label=1]
+c2 [label=1]
+
+b11 [label=0]
+b12 [label=0]
+b21 [label=0]
+b22 [label=0]
+c11 [label=0]
+c12 [label=0]
+c21 [label=0]
+c22 [label=0]
+}
