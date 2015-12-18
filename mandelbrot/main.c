@@ -5,7 +5,7 @@
 #include <pthread.h>
 // draws a mandelbrot fractal
 // compile with gcc fractal.c -lm -std=c99 -o fractal
-
+#define MAX_THREAD 8
 int pal[256] = {
     0xb2000a,0xb20009,0xb2000a,0xb1000a,0xb1000b,0xaf000d,0xaf000e,0xae000f,0xad0011,0xac0012,0xab0013,0xaa0015,
     0xa90016,0xa80018,0xa70019,0xa6001b,0xa4001d,0xa3001e,0xa2001f,0xa00022,0x9f0023,0x9e0025,0x9c0028,0x9b0029,
@@ -30,128 +30,107 @@ int pal[256] = {
     0xf6ff,0xf7ff,0xf8ff,0xfaff,0xfbff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,
     0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff};
 
-/* line struct */
 typedef struct {
-	int x;		/* min */
-	int y;		/* max */
-} point_s;
-
-typedef struct {
-	int width;
-	int height;
-} size_s;
-
-typedef struct {
+	int min;
+	int max;
 	float width;
 	float height;
-} sizef_s;
-
-typedef struct {
-	point_s p1;
-	point_s p2;
-} point2d_s;
-
-typedef struct {
-        unsigned int *pixmap;
-	sizef_s size;
-        point2d_s p2d;
+	unsigned int *pixmap;
 } mbrot_arg_s;
 
-/* rectangle struct */
-typedef struct {
-	point_s origin;	/* min-x */
-	size_s size;	/* min-y */
-} rect_s;
-
-/* creates a rectangle from the struct */
-#define MAX_THREAD 8
-#define MAX_SIZE 1024
-
-rect_s rect_fromPos(int pos, int size, int max_size) {
-	int x = pos * size % max_size;
-	int y = pos * size / max_size;
-
-	rect_s rectangle;
-
-	rectangle.origin.x = x;
-	rectangle.origin.y = y * size;
-	rectangle.size.width = rectangle.size.height = size;
-
-	return rectangle;
-}
-
-point2d_s point2d(rect_s r) {
-	point2d_s p;
-
-	p.p1.x = r.origin.x;
-	p.p1.y = r.origin.y;
-	p.p2.x = r.origin.x + r.size.width;
-	p.p2.y = r.origin.y + r.size.height;
-
-	return p;
-}
-
-void* mandelbrot_thread(void *s);
-
-void mandelbrot(float width, float height, unsigned int *pixmap) {
-	int i = 0;
-	int j = 0;
-	int t = 0;
-	pthread_t thread[MAX_THREAD];
-
-	for(i = 0; i < 16;i++) {
-		mbrot_arg_s *arg = malloc(sizeof(mbrot_arg_s));
-		arg->pixmap = pixmap;
-		arg->size.width = width;
-		arg->size.height = height;
-		arg->p2d = point2d(rect_fromPos(i, 1024 / MAX_THREAD * 2, 1024));
-		pthread_create(&thread[t++], NULL, mandelbrot_thread, arg);
-
-		if (t == MAX_THREAD) {
-			for(j = 0;j < MAX_THREAD;j++) pthread_join(thread[j], NULL);
-			t = 0;
-		}
-	}
-}
-
 void* mandelbrot_thread(void *s) {
-	int i, j;
-	mbrot_arg_s *arg = s;
+        int i, j;
+        mbrot_arg_s *arg = s;
 
-	float xmin = -1.6f;
-	float xmax = 1.6f;
-	float ymin = -1.6f;
-	float ymax = 1.6f;
-
-	for (i = arg->p2d.p1.y; i < arg->p2d.p2.y; i++) {
-		for (j = arg->p2d.p1.x; j < arg->p2d.p2.x; j++) {
-			float b = xmin + j * (xmax - xmin) / arg->size.width;
-			float a = ymin + i * (ymax - ymin) / arg->size.height;
-			float sx = 0.0f;
-			float sy = 0.0f;
-			int ii = 0;
-			while (sx + sy <= 64.0f) {
-				float xn = sx * sx - sy * sy + b;
-				float yn = 2 * sx * sy + a;
-				sx = xn;
-				sy = yn;
+        float xmin = -1.6f;
+        float xmax = 1.6f;
+        float ymin = -1.6f;
+        float ymax = 1.6f;
+        for (i = arg->min; i < arg->max; i++) {
+                /* float -> width (used three times in loop) */
+                int width = arg->width;
+                for (j = 0; j < width; j++) {
+                        float b = xmin + j * (xmax - xmin) / arg->width;
+                        float a = ymin + i * (ymax - ymin) / arg->height;
+                        float sx = 0.0f;
+                        float sy = 0.0f;
+                        int ii = 0;
+                        while (sx + sy <= 64.0f) {
+                                float xn = sx * sx - sy * sy + b;
+                                float yn = 2 * sx * sy + a;
+                                sx = xn;
+                                sy = yn;
 				ii++;
-				if (ii == 1500) {
+                                if (ii == 1500) {
 					break;
 				}
-			}
-			if (ii == 1500) {
-				arg->pixmap[j + i * (int)arg->size.width] = 0;
-			}
-			else {
-				int c = (int)((ii / 32.0f) * 256.0f);
-				arg->pixmap[j + i * (int)arg->size.width] = pal[c % 256];
-			}
-		}
+                        }
+                        if (ii == 1500) arg->pixmap[j+i * width] = 0;
+                        else {
+                                int c = (int)((ii / 32.0f) * 256.0f);
+                                arg->pixmap[j + i * width] = pal[c%256];
+                        }
+                }
+        }
+        free(arg);
+        pthread_exit(0);
+}
+
+void mandelbrot(float width, float height, unsigned int *pixmap) {
+	int i;
+	int w = (int)height / MAX_THREAD;
+	pthread_t thread[MAX_THREAD];
+
+	for (i = 0;i < MAX_THREAD; i++) {
+
+		mbrot_arg_s *a = malloc(sizeof(mbrot_arg_s));
+
+		a->min    = i * w;
+		a->max    = (i + 1) * w;
+		a->width  = width;
+		a->height = height;
+		a->pixmap = pixmap;
+
+		pthread_create(&thread[i], NULL, mandelbrot_thread, a);
 	}
+
+	for(i = 0;i < MAX_THREAD; i++) pthread_join(thread[i], NULL);
+}
+
+/*void* mandelbrot_thread(void *s) {
+        int i, j;
+	mbrot_arg_s *arg = s;
+
+        float xmin = -1.6f;
+        float xmax = 1.6f;
+        float ymin = -1.6f;
+        float ymax = 1.6f;
+        for (i = arg->min; i < arg->max; i++) {
+		
+		int width = arg->width;
+                for (j = 0; j < width; j++) {
+                        float b = xmin + j * (xmax - xmin) / arg->width;
+                        float a = ymin + i * (ymax - ymin) / arg->height;
+                        float sx = 0.0f;
+                        float sy = 0.0f;
+                        int ii = 0;
+                        while (sx + sy <= 64.0f) {
+                                float xn = sx * sx - sy * sy + b;
+                                float yn = 2 * sx * sy + a;
+                                sx = xn;
+                                sy = yn;
+                                if (ii++ == 1500) break;
+                        }
+                        if (ii == 1500) arg->pixmap[j+i * width] = 0;
+                        else {
+                                int c = (int)((ii / 32.0f) * 256.0f);
+                                arg->pixmap[j + i * width] = pal[c%256];
+                        }
+                }
+        }
 	free(arg);
 	pthread_exit(0);
-}
+}*/
 
 void writetga(unsigned int *pixmap, unsigned int width, unsigned int height, char *name) {
 	FILE *f;
@@ -182,7 +161,6 @@ void writetga(unsigned int *pixmap, unsigned int width, unsigned int height, cha
 
 int main(int a, char *args[]) {
 	int i, j;
-	//printf("fractal");
 	unsigned int* pixmap = malloc(1024*1024*sizeof(int));
 	mandelbrot(1024.0f, 1024.0f, pixmap);
 	writetga(pixmap, 1024, 1024, "fracout.tga");
