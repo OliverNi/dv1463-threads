@@ -97,41 +97,6 @@ void mandelbrot(float width, float height, unsigned int *pixmap) {
 	for(i = 0;i < MAX_THREAD; i++) pthread_join(thread[i], NULL);
 }
 
-/*void* mandelbrot_thread(void *s) {
-        int i, j;
-	mbrot_arg_s *arg = s;
-
-        float xmin = -1.6f;
-        float xmax = 1.6f;
-        float ymin = -1.6f;
-        float ymax = 1.6f;
-        for (i = arg->min; i < arg->max; i++) {
-		
-		int width = arg->width;
-                for (j = 0; j < width; j++) {
-                        float b = xmin + j * (xmax - xmin) / arg->width;
-                        float a = ymin + i * (ymax - ymin) / arg->height;
-                        float sx = 0.0f;
-                        float sy = 0.0f;
-                        int ii = 0;
-                        while (sx + sy <= 64.0f) {
-                                float xn = sx * sx - sy * sy + b;
-                                float yn = 2 * sx * sy + a;
-                                sx = xn;
-                                sy = yn;
-                                if (ii++ == 1500) break;
-                        }
-                        if (ii == 1500) arg->pixmap[j+i * width] = 0;
-                        else {
-                                int c = (int)((ii / 32.0f) * 256.0f);
-                                arg->pixmap[j + i * width] = pal[c%256];
-                        }
-                }
-        }
-	free(arg);
-	pthread_exit(0);
-}*/
-
 void writetga(unsigned int *pixmap, unsigned int width, unsigned int height, char *name) {
 	FILE *f;
 	int i,j;
